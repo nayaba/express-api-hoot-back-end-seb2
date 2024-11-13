@@ -42,4 +42,33 @@ router.get('/:hootId', async (req, res) => {
     }
 })
 
+
+// UPDATE A HOOT
+router.put('/:hootId', async (req, res) => {
+    try {
+        //  find the hoot
+        const hoot = await Hoot.findById(req.params.hootId)
+
+        //  check if user owns hoot
+        if (!hoot.author.equals(req.user._id)) {
+            return res.status(403).send("You're not allowed to do that!")
+        }
+
+        //  Update hoot
+        const updatedHoot = await Hoot.findByIdAndUpdate(
+            req.params.hootId,
+            req.body,
+            { new: true }
+        )
+
+        //  add the user object
+        updatedHoot._doc.author = req.user
+
+        res.status(200).json(updatedHoot)
+    } catch (error) {
+        res.status(500).json(error)
+    }
+})
+
+
 module.exports = router
